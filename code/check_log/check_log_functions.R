@@ -101,6 +101,34 @@ check_port_code <- function(df){
     mutate(dev_code = substr(my_port_code,1,1), reg_code = substr(my_port_code,2,2), int_code = substr(my_port_code,3,3), isdev_code = substr(my_port_code,4,4), sound_code = substr(my_port_code,5,6) %>% as.numeric()) %>% 
     mutate(int_code = case_when(int_code == "9" ~ "16",
                                 TRUE ~ int_code))
+  test <- df %>% 
+    mutate(
+      my_port_code = stringr::str_pad(as.character(my_port_code),3,pad="0"),
+      dev_code = case_when(
+        substr(my_port_code,3,3) %in% c("1","2","5","6") ~ "1",
+        TRUE ~ "2"
+      ),
+      reg_code = case_when(
+        substr(my_port_code,3,3) %in% c("1","2","3","4") ~ "1",
+        TRUE ~ "2"
+      ),
+      isdev_code = case_when(
+        substr(my_port_code,3,3) %in% c("1","3","5","7") ~ "0",
+        TRUE ~ "1"
+      ),
+      int_code = case_when(
+        as.numeric(substr(my_port_code,1,2)) < 2 ~ 1,
+        as.numeric(substr(my_port_code,1,2)) < 4 ~ 2,
+        as.numeric(substr(my_port_code,1,2)) < 8 ~ 4,
+        TRUE ~ 16
+      ),
+      sound_code = case_when(
+        int_code == 1 ~ 1,
+        int_code == 2 ~ as.numeric(substr(my_port_code,1,2)) - 1,
+        int_code == 4 ~ as.numeric(substr(my_port_code,1,2)) - 3,
+        int_code == 16 ~ as.numeric(substr(my_port_code,1,2)) - 7,
+      )
+      )
   res <- all(c(all(test$deviant_condition == test$dev_code),
         all(test$regularity_condition == test$reg_code),
         all(test$interval_condition == test$int_code),
@@ -114,6 +142,7 @@ check_port_code <- function(df){
 
 run_all_check <- function(df){
   message("====== Current participant: ", get_cb_id(df), " =========")
+  message(df %>% check_port_code())
   message(df %>% check_block_num())
   message(df %>% check_trial_num())
   message(df %>% check_conditions())
