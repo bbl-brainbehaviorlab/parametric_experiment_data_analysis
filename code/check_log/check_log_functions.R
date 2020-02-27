@@ -2,11 +2,13 @@
 
 library(tidyverse)
 
-cbtable_path = "~/Dropbox/Working/01_EntrainmentProject/0_ExperimentParametric/0_Design/ParametricDesign_counterbalance_v4.ods"
+cbtable_path = "~/Dropbox/Working/01_EntrainmentProject/0_ExperimentParametric/0_Design/ParametricDesign_counterbalance_v5.1.ods"
 
 deviant_order_definition <- list(c(1,2),c(2,1))
 regularity_order_definition <- list(c(1,2),c(2,1))
 interval_order_definition <- list(c(1,2,16,4),c(2,4,1,16),c(4,16,2,1),c(16,1,4,2))
+int2_variation_definition <- list(c(1,16),c(2,15),c(3,14),c(4,13),c(5,12),c(6,11),c(7,10),c(8,9))
+int4_variation_definition <- list(c(1,6,11,16), c(4,7,10,13),c(7,8,9,10))
 
 cbtable <- readODS::read_ods(cbtable_path)
 
@@ -68,6 +70,49 @@ check_interval_order <- function(df){
   res <- all.equal(rle(df$interval_condition)$values, 
                    interval_order_definition[[cbtable$OrderInterval[cb_id]]] %>% rep(4))
   if (res) return("TRUE. Interval_order") else return("FALSE. interval order")
+}
+
+
+# Check whether the variation version is the same as cbtable
+check_variation_version <- function(df){
+  cb_id <- get_cb_id(df)
+  int2 = all(df$int2_variation == cbtable$Interval2_variation[cb_id])
+  int4 = all(df$int4_variation == cbtable$Interval4_variation[cb_id])
+  if (all(c(int2,int4) == T)) return("TRUE. Variation version correct") else return("FALSE. Variation version incorrect")
+}
+
+# check whether the file used for the variation version is correct
+check_variation_files <- function(df){
+  cb_id <- get_cb_id(df)
+  int2_files <- int2_variation_definition[[cbtable$Interval2_variation[cb_id]]]
+  int4_files <- int4_variation_definition[[cbtable$Interval4_variation[cb_id]]]
+  
+  int2 <- df %>% 
+    filter(interval_condition==2)
+  int4 <- df %>% 
+    filter(interval_condition==4)
+  
+  res2 <- all(gsub(".wav","",gsub("^.*_", "", int2$wav_file_name)) %in% int2_files == T)
+  res4 <- all(gsub(".wav","",gsub("^.*_", "", int4$wav_file_name)) %in% int4_files == T)
+  
+  if (all(c(res2,res4) == TRUE)) return("TRUE. Variation files correct.") else return("FALSE. Variation files incorrect")
+}
+
+check_regular_sound_file_order <- function(df){
+  interval2_order <- c(1,2)
+  interval4_order <- c(2,1,3,4)
+  interval16_order <- c(2,10,12, 5, 8, 3,14, 4,16,13, 1, 6, 9,15,11, 7)
+  
+  int2 <- df %>% filter(interval_condition==2,regularity_condition == 1) 
+  res2 <- all(int2$stimuli_file == rep(interval2_order,nrow(int2)/2))
+  int4 <- df %>% filter(interval_condition==4,regularity_condition == 1) 
+  res4 <- all(int4$stimuli_file == rep(interval4_order,nrow(int2)/4))
+  int16 <- df %>% filter(interval_condition==16,regularity_condition == 1) 
+  res16 <- all(int16$stimuli_file == rep(interval16_order,nrow(int16)/4))
+  
+  if (all(c(res2,res4,res16)==T)) return("TRUE. Sound files order in regular condition correct") else return("FALSE. Sound files order in regular condition incorrect")
+  
+  
 }
 
 # check number of deviant in each block
@@ -140,6 +185,7 @@ check_port_code <- function(df){
 }
 
 
+
 run_all_check <- function(df){
   message("====== Current participant: ", get_cb_id(df), " =========")
   message(df %>% check_port_code())
@@ -151,6 +197,9 @@ run_all_check <- function(df){
   message(df %>% check_interval_order())
   message(df %>% check_deviant_num())
   message(df %>% check_deviant_equal_chance())
+  message(df %>% check_variation_version())
+  message(df %>% check_variation_files())
+  message(df %>% check_regular_sound_file_order())
 }
 
 
