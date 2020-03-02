@@ -285,3 +285,14 @@ mean_num_preceeding_standard <- function(df) {
     cbid,deviant_conditon,regularity_condition,interval_condition,mean_preceeding,sd_preceeding,min_preceeding,max_preceeding
   ))
 }
+
+
+# find out info regarding the stnadards right before the deviants
+immediate_preceding_standards <- function(df){
+  # add a column of whether this is the prceeding standard
+  test <- df %>% 
+    mutate(immediate_preceding = lead(is_deviant,default=0)) %>% 
+    filter(immediate_preceding == 1) %>% 
+    group_by(regularity_condition,deviant_condition,interval_condition,stimuli_file) %>% 
+    summarise(count = n())
+}
