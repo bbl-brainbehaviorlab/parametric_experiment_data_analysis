@@ -100,7 +100,7 @@ check_variation_files <- function(df){
 
 check_regular_sound_file_order <- function(df){
   cb_id <- get_cb_id(df)
-  interval4_order_deinition <- list(
+  interval4_order_definition <- list(
     c(1,2,3,4),
     c(1,2,4,3),
     c(1,3,2,4),
@@ -143,8 +143,8 @@ check_regular_sound_file_order <- function(df){
     c(10,14,3,12,11,16,8,15,2,4,1,6,7,5,13,9)
   )
   interval2_order <- c(1,2)
-  interval4_order <- interval4_order_deinition[[cbtable$Interval4_regularOrder[cb_id]]]
-  interval16_order <- interval16_order_deinition[[cbtable$Interval16_regularOrder[cb_id]]]
+  interval4_order <- interval4_order_definition[[cbtable$Interval4_regularOrder[cb_id]]]
+  interval16_order <- interval16_order_definition[[cbtable$Interval16_regularOrder[cb_id]]]
   
   int2 <- df %>% filter(interval_condition==2,regularity_condition == 1) 
   res2 <- all(int2$stimuli_file == rep(interval2_order,nrow(int2)/2))

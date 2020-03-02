@@ -1,7 +1,7 @@
 library(tidyverse)
 source(here::here("code/check_log/check_log_functions.R"))
 
-path <-  "~/Dropbox/Working/01_EntrainmentProject/0_ExperimentParametric/03_ExperimentCoding/important_log_archive/heidi_test_v2_1"
+path <-  "~/Dropbox/Working/01_EntrainmentProject/0_ExperimentParametric/03_ExperimentCoding/important_log_archive/heidi_test_v2_2"
 files <- list.files(path = path, full.names = F)
 
 preceeding_standards_all <- NULL
